@@ -1,18 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
-  FlatList,
-  SafeAreaView,
   ScrollView,
   Dimensions,
   ImageBackground,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Icon, FontAwesome } from "@expo/vector-icons";
-import { LineChart } from "react-native-chart-kit";
+
+import { FontAwesome } from "@expo/vector-icons";
+import { LineChart, PieChart } from "react-native-chart-kit";
+import styles from "./HomeStyles"; //
+import {
+  initializeBluetooth,
+  cleanupBluetooth,
+} from "../../utils/BluetoothConnection";
 
 const screenWidth = Dimensions.get("window").width - 30;
 const data = {
@@ -24,6 +26,39 @@ const data = {
   ],
   legend: ["Distance Traveled"], // optional
 };
+
+const speedData = [
+  {
+    population: 20,
+    color: "#c9c5e5",
+    name: "0-20 mph",
+    legendFontColor: "#7F7F7F",
+  },
+  {
+    population: 15,
+    color: "#a59ed3",
+    name: "40-60 mph",
+    legendFontColor: "#7F7F7F",
+  },
+  {
+    population: 30,
+    color: "#5d50b0",
+    name: "20-40 mph",
+    legendFontColor: "#7F7F7F",
+  },
+  {
+    population: 10,
+    color: "#3c3086",
+    name: "60-80 mph",
+    legendFontColor: "#7F7F7F",
+  },
+  {
+    population: 25,
+    color: "#261e54",
+    name: "80+ mph",
+    legendFontColor: "#7F7F7F",
+  },
+];
 
 const Item = ({ item }) => (
   <View>
@@ -56,6 +91,10 @@ chartConfig = {
 };
 
 const HomeScreen = (props) => {
+  // useEffect(() => {
+  //   initializeBluetooth();
+  //   return cleanupBluetooth;
+  // }, []);
   return (
     <ImageBackground
       source={require("../../../assets/images/back.png")}
@@ -89,12 +128,21 @@ const HomeScreen = (props) => {
       </View>
 
       {/* Graph Section  */}
-      <View style={[styles.section, styles.graphSection]}>
-        <Text style={styles.sectionTitle}>Motorcycle Riding Activity</Text>
+      <Text style={styles.sectionTitle}>Motorcycle Riding Activity</Text>
+      <ScrollView
+        horizontal={true}
+        contentContainerStyle={{
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 15,
+          paddingVertical: 10, // Adjust the value to change the spacing
+          height: 250,
+        }}
+      >
         <LineChart
           data={data}
           width={screenWidth}
-          height={220}
+          height={200}
           chartConfig={chartConfig}
           yAxisSuffix=" km"
           bezier
@@ -103,7 +151,16 @@ const HomeScreen = (props) => {
             borderRadius: 16,
           }}
         />
-      </View>
+        <PieChart
+          data={speedData}
+          width={screenWidth}
+          height={200}
+          chartConfig={chartConfig}
+          accessor={"population"}
+          paddingLeft={"15"}
+        />
+      </ScrollView>
+
       {/* Features Section */}
       <View style={[styles.section, styles.featureSection]}>
         <Text style={styles.sectionTitle}>Features</Text>
@@ -116,96 +173,15 @@ const HomeScreen = (props) => {
             <FontAwesome name="bluetooth" size={24} color="#ffffff" />
             <Text style={styles.featureText}>Bluetooth</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.feature, { elevation: 5 }]}>
-            <FontAwesome name="check" size={24} color="#ffffff" />
-            <Text style={styles.featureText}>Strap{"\n"} Closed</Text>
+          <TouchableOpacity style={styles.feature}>
+            <FontAwesome name="wifi" size={24} color="#ffffff" />
+            <Text style={styles.space}></Text>
+            <Text style={styles.featureText}>Offline Mode</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.offlineButton}>
-          <FontAwesome name="wifi" size={24} color="#ffffff" />
-          <Text style={styles.space}></Text>
-          <Text style={styles.offlineText}>Offline Mode</Text>
-        </TouchableOpacity>
       </View>
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-
-  gradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    height: "14%",
-    borderRadius: 10,
-    paddingHorizontal: 30,
-  },
-  title: {
-    fontSize: 17,
-    color: "#ffffff",
-  },
-  section: {
-    width: "100%",
-    borderRadius: 8,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  featureSection: {
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    elevation: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  featureContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  feature: {
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    elevation: 5,
-    backgroundColor: "#4b3ca7",
-    borderRadius: 8,
-    paddingVertical: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    width: "30%",
-  },
-  featureText: {
-    marginTop: 10,
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#ffffff",
-    textAlign: "center",
-  },
-  offlineButton: {
-    backgroundColor: "#4b3ca7",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    height: 40,
-    width: "100%",
-    borderRadius: 8,
-    marginTop: 20,
-    elevation: 5,
-  },
-  offlineText: {
-    color: "#ffffff",
-  },
-  space: {
-    width: 10,
-  },
-  routeContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    elevation: 5,
-  },
-});
 
 export default HomeScreen;

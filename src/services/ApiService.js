@@ -2,7 +2,7 @@ import axios from "axios";
 export const postData = async (data) => {
   //   console.log(data);
   axios
-    .post("http://192.168.43.49:3000/", data, {
+    .post("http://192.168.43.179:3001/", data, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/x-www-form-urlencoded",

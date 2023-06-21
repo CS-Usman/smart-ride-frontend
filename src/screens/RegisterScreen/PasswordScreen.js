@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -15,21 +15,30 @@ import {
 
 import { Formik } from "formik";
 
-import Btn, { GoogleBtn } from "../../components/Button";
+import Btn from "../../components/Button";
 import Field from "../../components/TextInput";
-import { SignUpValidationSchema } from "../../utils/FormValidation";
+import { PasswordValidationSchema } from "../../utils/FormValidation";
 
 const { width, height } = Dimensions.get("window");
 
-const RegisterScreen = (props) => {
+const PasswordScreen = (props) => {
+  const { userData } = props.route.params;
+  const [passwordError, setPasswordError] = useState(false);
+
   const initialValues = {
-    name: "",
-    username: "",
-    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
   };
 
   const handleSubmit = async (values) => {
-    props.navigation.navigate("PasswordScreen", { userData: values });
+    console.log("BtnClicked"); // --> getting values on submit
+    if (values.password !== values.confirmPassword) {
+      setPasswordError(true);
+    }
+    const data = { ...userData, ...values };
+    delete data.confirmPassword;
+    console.log(data); // --> getting values on submit
+    props.navigation.navigate("PermissionsScreen", { userData: data });
   };
   return (
     <KeyboardAvoidingView>
@@ -40,39 +49,34 @@ const RegisterScreen = (props) => {
         <View style={styles.container}>
           <Text style={styles.title}>Sign Up</Text>
           <View style={styles.registerContainer}>
-            <Text style={styles.subtitle}>Create a new account</Text>
+            <Text style={styles.subtitle}>Set Up Password</Text>
             <Text style={styles.description}>Join with other riders</Text>
             <Formik
               initialValues={initialValues}
-              validationSchema={SignUpValidationSchema}
+              validationSchema={PasswordValidationSchema}
               onSubmit={handleSubmit}
             >
               {({ handleChange, handleBlur, handleSubmit, values, errors }) => (
                 <>
                   <Field
-                    onChangeText={handleChange("name")}
-                    value={values.name}
-                    placeholder="Name"
+                    onChangeText={handleChange("password")}
+                    onBlur={handleBlur("password")}
+                    value={values.password}
+                    placeholder="Password"
+                    secureTextEntry
                   />
-                  <Field
-                    onChangeText={handleChange("username")}
-                    onBlur={handleBlur("username")}
-                    value={values.username}
-                    placeholder="Username"
-                  />
-                  {errors.username && (
-                    <Text style={styles.errorText}>{errors.username}</Text>
+                  {errors.password && (
+                    <Text style={styles.errorText}>{errors.password}</Text>
                   )}
-
                   <Field
-                    onChangeText={handleChange("phoneNumber")}
-                    onBlur={handleBlur("phoneNumber")}
-                    value={values.phoneNumber}
-                    placeholder="Phone Number"
-                    keyboardType="phone-pad"
+                    onChangeText={handleChange("confirmPassword")}
+                    onBlur={handleBlur("confirmPassword")}
+                    value={values.confirmPassword}
+                    placeholder="Rewrite Password"
+                    secureTextEntry
                   />
-                  {errors.phoneNumber && (
-                    <Text style={styles.errorText}>{errors.phoneNumber}</Text>
+                  {passwordError && (
+                    <Text style={styles.errorText}>Password did not match</Text>
                   )}
                   <Text style={styles.space}>{""}</Text>
                   <Btn
@@ -83,11 +87,6 @@ const RegisterScreen = (props) => {
                 </>
               )}
             </Formik>
-
-            <GoogleBtn
-              btnLabel="Sign Up with "
-              Press={() => alert("Logged In as Google")}
-            />
           </View>
         </View>
       </ImageBackground>
@@ -133,4 +132,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegisterScreen;
+export default PasswordScreen;

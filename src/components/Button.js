@@ -41,6 +41,13 @@ export function AcceptBtn({ btnLabel, Press }) {
     </TouchableOpacity>
   );
 }
+export function AddToEmergencyContactBtn({ btnLabel, Press }) {
+  return (
+    <TouchableOpacity onPress={Press} style={styles.emergencyBtnStyle}>
+      <Text style={[styles.btnTextStyle]}>{btnLabel}</Text>
+    </TouchableOpacity>
+  );
+}
 
 const styles = StyleSheet.create({
   btnStyle: {
@@ -55,5 +62,13 @@ const styles = StyleSheet.create({
     color: "#ffff",
     fontSize: responsiveFontSize(2.5),
     fontWeight: "bold",
+  },
+  emergencyBtnStyle: {
+    backgroundColor: "#4b3ca7",
+    borderRadius: 100,
+    alignItems: "center",
+    width: responsiveWidth(90),
+    paddingVertical: responsiveHeight(1.5),
+    marginVertical: responsiveHeight(1),
   },
 });

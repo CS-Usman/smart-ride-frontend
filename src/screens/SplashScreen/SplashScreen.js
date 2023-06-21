@@ -12,7 +12,6 @@ import {
   responsiveWidth,
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
-import { Icon, FontAwesome } from "react-native-vector-icons/FontAwesome";
 import NetInfo from "@react-native-community/netinfo";
 
 const SplashScreen = ({ navigation }) => {
@@ -23,10 +22,11 @@ const SplashScreen = ({ navigation }) => {
     });
     if (isConnected) {
       const timeout = setTimeout(() => {
-        navigation.replace("AddContactsScreen");
+        console.log("Hello");
+        navigation.replace("LoginScreen");
       }, 3000);
     } else {
-      Alert.alert("Internet Status", "You are connected to the internet");
+      Alert.alert("Internet Status", "You are not connected to the internet");
     }
     return () => {
       unsubscribe();

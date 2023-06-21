@@ -3,9 +3,9 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   Dimensions,
   ImageBackground,
+  Alert,
 } from "react-native";
 
 import {
@@ -15,19 +15,34 @@ import {
 } from "react-native-responsive-dimensions";
 
 import { AcceptBtn } from "../../components/Button";
-import AddContactScreen from "./AddContactScreen";
+import {
+  ContactAccessPermission,
+  LocationAccessPermission,
+  FileStoragePermission,
+} from "../../services/getPermissions";
 
 const { width, height } = Dimensions.get("window");
 
 const PermissionsScreen = (props) => {
-  const [locationPermission, setLocationPermission] = useState(false);
-  const [filesPermission, setFilesPermission] = useState(false);
-  const [contactsPermission, setContactsPermission] = useState(false);
+  const { userData } = props.route.params;
+  const [permissionAccess, setPermissionAccess] = useState(false);
 
-  const handleGrantPermission = () => {
-    setLocationPermission(true);
-    setFilesPermission(true);
-    setContactsPermission(true);
+  const handleGrantPermission = async () => {
+    const contactAccessGranted = await ContactAccessPermission();
+    const locationAccessGranted = await LocationAccessPermission();
+    const fileStorageAccessGranted = await FileStoragePermission();
+
+    if (
+      contactAccessGranted &&
+      locationAccessGranted &&
+      fileStorageAccessGranted
+    ) {
+      props.navigation.navigate("ContactsScreen", { userData: userData });
+    } else {
+      Alert.alert(
+        "  We need your permission to access certain features of the app. \n Please grant the necessary permissions to continue"
+      );
+    }
   };
 
   return (
@@ -55,10 +70,7 @@ const PermissionsScreen = (props) => {
               contacts
             </Text>
           </View>
-          <AcceptBtn
-            btnLabel="Allow"
-            Press={() => props.navigation.navigate("ContactsScreen")}
-          />
+          <AcceptBtn btnLabel="Allow" Press={handleGrantPermission} />
         </View>
       </View>
     </ImageBackground>

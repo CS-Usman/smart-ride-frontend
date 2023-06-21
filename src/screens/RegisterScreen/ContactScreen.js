@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  StyleSheet,
-  Button,
-} from "react-native";
-import CheckBox from "expo-checkbox";
-// Import the Checkbox component
+import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
 
+import CheckBox from "expo-checkbox";
 import * as Contacts from "expo-contacts";
 
-const SearchContactScreen = () => {
+import { AddToEmergencyContactBtn } from "../../components/Button";
+import { SearchField } from "../../components/TextInput";
+import CustomText from "../../components/CustomText";
+import ContactLoadingPopup from "../../components/EmergencyContactLoadingPopup";
+const SearchContactScreen = (props) => {
   const [searchText, setSearchText] = useState("");
   const [contactsData, setContactsData] = useState([]);
   const [filteredContacts, setFilteredContacts] = useState([]);
   const [emergencyContacts, setEmergencyContacts] = useState([]);
-  console.log(emergencyContacts);
+  const [loading, setLoading] = useState(true);
+
+  const { userData } = props.route.params;
 
   useEffect(() => {
     (async () => {
@@ -27,11 +25,12 @@ const SearchContactScreen = () => {
           fields: [Contacts.Fields.Name, Contacts.Fields.PhoneNumbers],
         });
 
-        if (data.length > 0) {
+        if (data.length > 1) {
           setContactsData(data);
           setFilteredContacts(data);
         }
       }
+      setLoading(false);
     })();
   }, []);
 
@@ -53,6 +52,7 @@ const SearchContactScreen = () => {
   };
 
   const handleAddToEmergencyContacts = () => {
+    console.log("Conatct btn click");
     const selectedContacts = filteredContacts.filter(
       (contact) => contact.isSelected
     );
@@ -60,14 +60,19 @@ const SearchContactScreen = () => {
       ...prevEmergencyContacts,
       ...selectedContacts,
     ]);
+    props.navigation.navigate("ConfirmationScreen", {
+      userData: userData,
+      emergencyContacts: [...emergencyContacts, ...selectedContacts],
+    });
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.contactItem}>
-      <Text style={styles.contactName}>{item.name}</Text>
+      <CustomText label={item.name} style={styles.contactName} />
       <CheckBox
         value={item.isSelected}
         onValueChange={() => handleContactSelection(item.id)}
+        color={filteredContacts ? "#4b3ca7" : undefined}
       />
     </View>
   );
@@ -75,29 +80,21 @@ const SearchContactScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search"
-          onChangeText={handleSearch}
-          value={searchText}
-        />
+        <SearchField onChangeText={handleSearch} value={searchText} />
       </View>
       <FlatList
         data={filteredContacts}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => `${item.id}-${item.name}`}
         contentContainerStyle={styles.listContainer}
       />
-      <Text>Emergency Contacts:</Text>
-      <FlatList
-        data={emergencyContacts}
-        renderItem={({ item }) => <Text>{item.name}</Text>}
-        keyExtractor={(item) => item.id.toString()}
+
+      <AddToEmergencyContactBtn
+        btnLabel="Add to Emergency Contacts"
+        Press={handleAddToEmergencyContacts}
       />
-      <Button
-        title="Add to Emergency Contacts"
-        onPress={handleAddToEmergencyContacts}
-      />
+
+      {loading && <ContactLoadingPopup />}
     </View>
   );
 };
@@ -109,7 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9F9F9",
   },
   searchContainer: {
-    marginBottom: 16,
+    marginVertical: 16,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
@@ -123,13 +120,13 @@ const styles = StyleSheet.create({
   },
   contactItem: {
     flexDirection: "row", // Align text and checkbox horizontally
-    alignItems: "center", // Center items vertically
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#DDD",
   },
   contactName: {
-    flex: 1, // Take up remaining space
+    flex: 1,
     fontSize: 16,
   },
 });
